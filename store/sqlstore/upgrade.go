@@ -19,13 +19,13 @@ type upgradeFunc func(*sql.Tx, *Container) error
 var Upgrades = [...]upgradeFunc{upgradeV1, upgradeV2, upgradeV3}
 
 func (c *Container) getVersion() (int, error) {
-	_, err := c.db.Exec("CREATE TABLE IF NOT EXISTS whatsmeow_version (version INTEGER)")
+	_, err := c.Db.Exec("CREATE TABLE IF NOT EXISTS whatsmeow_version (version INTEGER)")
 	if err != nil {
 		return -1, err
 	}
 
 	version := 0
-	row := c.db.QueryRow("SELECT version FROM whatsmeow_version LIMIT 1")
+	row := c.Db.QueryRow("SELECT version FROM whatsmeow_version LIMIT 1")
 	if row != nil {
 		_ = row.Scan(&version)
 	}
@@ -50,7 +50,7 @@ func (c *Container) Upgrade() error {
 
 	for ; version < len(Upgrades); version++ {
 		var tx *sql.Tx
-		tx, err = c.db.Begin()
+		tx, err = c.Db.Begin()
 		if err != nil {
 			return err
 		}

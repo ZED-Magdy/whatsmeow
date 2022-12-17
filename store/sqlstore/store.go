@@ -76,23 +76,23 @@ const (
 )
 
 func (s *SQLStore) PutIdentity(address string, key [32]byte) error {
-	_, err := s.db.Exec(putIdentityQuery, s.JID, address, key[:])
+	_, err := s.Db.Exec(putIdentityQuery, s.JID, address, key[:])
 	return err
 }
 
 func (s *SQLStore) DeleteAllIdentities(phone string) error {
-	_, err := s.db.Exec(deleteAllIdentitiesQuery, s.JID, phone+":%")
+	_, err := s.Db.Exec(deleteAllIdentitiesQuery, s.JID, phone+":%")
 	return err
 }
 
 func (s *SQLStore) DeleteIdentity(address string) error {
-	_, err := s.db.Exec(deleteAllIdentitiesQuery, s.JID, address)
+	_, err := s.Db.Exec(deleteAllIdentitiesQuery, s.JID, address)
 	return err
 }
 
 func (s *SQLStore) IsTrustedIdentity(address string, key [32]byte) (bool, error) {
 	var existingIdentity []byte
-	err := s.db.QueryRow(getIdentityQuery, s.JID, address).Scan(&existingIdentity)
+	err := s.Db.QueryRow(getIdentityQuery, s.JID, address).Scan(&existingIdentity)
 	if errors.Is(err, sql.ErrNoRows) {
 		// Trust if not known, it'll be saved automatically later
 		return true, nil
@@ -116,7 +116,7 @@ const (
 )
 
 func (s *SQLStore) GetSession(address string) (session []byte, err error) {
-	err = s.db.QueryRow(getSessionQuery, s.JID, address).Scan(&session)
+	err = s.Db.QueryRow(getSessionQuery, s.JID, address).Scan(&session)
 	if errors.Is(err, sql.ErrNoRows) {
 		err = nil
 	}
@@ -124,7 +124,7 @@ func (s *SQLStore) GetSession(address string) (session []byte, err error) {
 }
 
 func (s *SQLStore) HasSession(address string) (has bool, err error) {
-	err = s.db.QueryRow(hasSessionQuery, s.JID, address).Scan(&has)
+	err = s.Db.QueryRow(hasSessionQuery, s.JID, address).Scan(&has)
 	if errors.Is(err, sql.ErrNoRows) {
 		err = nil
 	}
@@ -132,17 +132,17 @@ func (s *SQLStore) HasSession(address string) (has bool, err error) {
 }
 
 func (s *SQLStore) PutSession(address string, session []byte) error {
-	_, err := s.db.Exec(putSessionQuery, s.JID, address, session)
+	_, err := s.Db.Exec(putSessionQuery, s.JID, address, session)
 	return err
 }
 
 func (s *SQLStore) DeleteAllSessions(phone string) error {
-	_, err := s.db.Exec(deleteAllSessionsQuery, s.JID, phone+":%")
+	_, err := s.Db.Exec(deleteAllSessionsQuery, s.JID, phone+":%")
 	return err
 }
 
 func (s *SQLStore) DeleteSession(address string) error {
-	_, err := s.db.Exec(deleteSessionQuery, s.JID, address)
+	_, err := s.Db.Exec(deleteSessionQuery, s.JID, address)
 	return err
 }
 
@@ -158,13 +158,13 @@ const (
 
 func (s *SQLStore) genOnePreKey(id uint32, markUploaded bool) (*keys.PreKey, error) {
 	key := keys.NewPreKey(id)
-	_, err := s.db.Exec(insertPreKeyQuery, s.JID, key.KeyID, key.Priv[:], markUploaded)
+	_, err := s.Db.Exec(insertPreKeyQuery, s.JID, key.KeyID, key.Priv[:], markUploaded)
 	return key, err
 }
 
 func (s *SQLStore) getNextPreKeyID() (uint32, error) {
 	var lastKeyID sql.NullInt32
-	err := s.db.QueryRow(getLastPreKeyIDQuery, s.JID).Scan(&lastKeyID)
+	err := s.Db.QueryRow(getLastPreKeyIDQuery, s.JID).Scan(&lastKeyID)
 	if err != nil {
 		return 0, fmt.Errorf("failed to query next prekey ID: %w", err)
 	}
@@ -185,7 +185,7 @@ func (s *SQLStore) GetOrGenPreKeys(count uint32) ([]*keys.PreKey, error) {
 	s.preKeyLock.Lock()
 	defer s.preKeyLock.Unlock()
 
-	res, err := s.db.Query(getUnuploadedPreKeysQuery, s.JID, count)
+	res, err := s.Db.Query(getUnuploadedPreKeysQuery, s.JID, count)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query existing prekeys: %w", err)
 	}
@@ -238,21 +238,21 @@ func scanPreKey(row scannable) (*keys.PreKey, error) {
 }
 
 func (s *SQLStore) GetPreKey(id uint32) (*keys.PreKey, error) {
-	return scanPreKey(s.db.QueryRow(getPreKeyQuery, s.JID, id))
+	return scanPreKey(s.Db.QueryRow(getPreKeyQuery, s.JID, id))
 }
 
 func (s *SQLStore) RemovePreKey(id uint32) error {
-	_, err := s.db.Exec(deletePreKeyQuery, s.JID, id)
+	_, err := s.Db.Exec(deletePreKeyQuery, s.JID, id)
 	return err
 }
 
 func (s *SQLStore) MarkPreKeysAsUploaded(upToID uint32) error {
-	_, err := s.db.Exec(markPreKeysAsUploadedQuery, s.JID, upToID)
+	_, err := s.Db.Exec(markPreKeysAsUploadedQuery, s.JID, upToID)
 	return err
 }
 
 func (s *SQLStore) UploadedPreKeyCount() (count int, err error) {
-	err = s.db.QueryRow(getUploadedPreKeyCountQuery, s.JID).Scan(&count)
+	err = s.Db.QueryRow(getUploadedPreKeyCountQuery, s.JID).Scan(&count)
 	return
 }
 
@@ -265,12 +265,12 @@ const (
 )
 
 func (s *SQLStore) PutSenderKey(group, user string, session []byte) error {
-	_, err := s.db.Exec(putSenderKeyQuery, s.JID, group, user, session)
+	_, err := s.Db.Exec(putSenderKeyQuery, s.JID, group, user, session)
 	return err
 }
 
 func (s *SQLStore) GetSenderKey(group, user string) (key []byte, err error) {
-	err = s.db.QueryRow(getSenderKeyQuery, s.JID, group, user).Scan(&key)
+	err = s.Db.QueryRow(getSenderKeyQuery, s.JID, group, user).Scan(&key)
 	if errors.Is(err, sql.ErrNoRows) {
 		err = nil
 	}
@@ -287,13 +287,13 @@ const (
 )
 
 func (s *SQLStore) PutAppStateSyncKey(id []byte, key store.AppStateSyncKey) error {
-	_, err := s.db.Exec(putAppStateSyncKeyQuery, s.JID, id, key.Data, key.Timestamp, key.Fingerprint)
+	_, err := s.Db.Exec(putAppStateSyncKeyQuery, s.JID, id, key.Data, key.Timestamp, key.Fingerprint)
 	return err
 }
 
 func (s *SQLStore) GetAppStateSyncKey(id []byte) (*store.AppStateSyncKey, error) {
 	var key store.AppStateSyncKey
-	err := s.db.QueryRow(getAppStateSyncKeyQuery, s.JID, id).Scan(&key.Data, &key.Timestamp, &key.Fingerprint)
+	err := s.Db.QueryRow(getAppStateSyncKeyQuery, s.JID, id).Scan(&key.Data, &key.Timestamp, &key.Fingerprint)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
@@ -314,13 +314,13 @@ const (
 )
 
 func (s *SQLStore) PutAppStateVersion(name string, version uint64, hash [128]byte) error {
-	_, err := s.db.Exec(putAppStateVersionQuery, s.JID, name, version, hash[:])
+	_, err := s.Db.Exec(putAppStateVersionQuery, s.JID, name, version, hash[:])
 	return err
 }
 
 func (s *SQLStore) GetAppStateVersion(name string) (version uint64, hash [128]byte, err error) {
 	var uncheckedHash []byte
-	err = s.db.QueryRow(getAppStateVersionQuery, s.JID, name).Scan(&version, &uncheckedHash)
+	err = s.Db.QueryRow(getAppStateVersionQuery, s.JID, name).Scan(&version, &uncheckedHash)
 	if errors.Is(err, sql.ErrNoRows) {
 		// version will be 0 and hash will be an empty array, which is the correct initial state
 		err = nil
@@ -337,7 +337,7 @@ func (s *SQLStore) GetAppStateVersion(name string) (version uint64, hash [128]by
 }
 
 func (s *SQLStore) DeleteAppStateVersion(name string) error {
-	_, err := s.db.Exec(deleteAppStateVersionQuery, s.JID, name)
+	_, err := s.Db.Exec(deleteAppStateVersionQuery, s.JID, name)
 	return err
 }
 
@@ -369,7 +369,7 @@ const mutationBatchSize = 400
 
 func (s *SQLStore) PutAppStateMutationMACs(name string, version uint64, mutations []store.AppStateMutationMAC) error {
 	if len(mutations) > mutationBatchSize {
-		tx, err := s.db.Begin()
+		tx, err := s.Db.Begin()
 		if err != nil {
 			return fmt.Errorf("failed to start transaction: %w", err)
 		}
@@ -392,7 +392,7 @@ func (s *SQLStore) PutAppStateMutationMACs(name string, version uint64, mutation
 		}
 		return nil
 	} else if len(mutations) > 0 {
-		return s.putAppStateMutationMACs(s.db, name, version, mutations)
+		return s.putAppStateMutationMACs(s.Db, name, version, mutations)
 	}
 	return nil
 }
@@ -402,7 +402,7 @@ func (s *SQLStore) DeleteAppStateMutationMACs(name string, indexMACs [][]byte) (
 		return
 	}
 	if s.dialect == "postgres" && PostgresArrayWrapper != nil {
-		_, err = s.db.Exec(deleteAppStateMutationMACsQueryPostgres, s.JID, name, PostgresArrayWrapper(indexMACs))
+		_, err = s.Db.Exec(deleteAppStateMutationMACsQueryPostgres, s.JID, name, PostgresArrayWrapper(indexMACs))
 	} else {
 		args := make([]interface{}, 2+len(indexMACs))
 		args[0] = s.JID
@@ -412,13 +412,13 @@ func (s *SQLStore) DeleteAppStateMutationMACs(name string, indexMACs [][]byte) (
 			args[2+i] = item
 			queryParts[i] = fmt.Sprintf("$%d", i+3)
 		}
-		_, err = s.db.Exec(deleteAppStateMutationMACsQueryGeneric+"("+strings.Join(queryParts, ",")+")", args...)
+		_, err = s.Db.Exec(deleteAppStateMutationMACsQueryGeneric+"("+strings.Join(queryParts, ",")+")", args...)
 	}
 	return
 }
 
 func (s *SQLStore) GetAppStateMutationMAC(name string, indexMAC []byte) (valueMAC []byte, err error) {
-	err = s.db.QueryRow(getAppStateMutationMACQuery, s.JID, name, indexMAC).Scan(&valueMAC)
+	err = s.Db.QueryRow(getAppStateMutationMACQuery, s.JID, name, indexMAC).Scan(&valueMAC)
 	if errors.Is(err, sql.ErrNoRows) {
 		err = nil
 	}
@@ -460,7 +460,7 @@ func (s *SQLStore) PutPushName(user types.JID, pushName string) (bool, string, e
 		return false, "", err
 	}
 	if cached.PushName != pushName {
-		_, err = s.db.Exec(putPushNameQuery, s.JID, user, pushName)
+		_, err = s.Db.Exec(putPushNameQuery, s.JID, user, pushName)
 		if err != nil {
 			return false, "", err
 		}
@@ -481,7 +481,7 @@ func (s *SQLStore) PutBusinessName(user types.JID, businessName string) (bool, s
 		return false, "", err
 	}
 	if cached.BusinessName != businessName {
-		_, err = s.db.Exec(putBusinessNameQuery, s.JID, user, businessName)
+		_, err = s.Db.Exec(putBusinessNameQuery, s.JID, user, businessName)
 		if err != nil {
 			return false, "", err
 		}
@@ -502,7 +502,7 @@ func (s *SQLStore) PutContactName(user types.JID, firstName, fullName string) er
 		return err
 	}
 	if cached.FirstName != firstName || cached.FullName != fullName {
-		_, err = s.db.Exec(putContactNameQuery, s.JID, user, firstName, fullName)
+		_, err = s.Db.Exec(putContactNameQuery, s.JID, user, firstName, fullName)
 		if err != nil {
 			return err
 		}
@@ -548,7 +548,7 @@ func (s *SQLStore) putContactNamesBatch(tx execable, contacts []store.ContactEnt
 
 func (s *SQLStore) PutAllContactNames(contacts []store.ContactEntry) error {
 	if len(contacts) > contactBatchSize {
-		tx, err := s.db.Begin()
+		tx, err := s.Db.Begin()
 		if err != nil {
 			return fmt.Errorf("failed to start transaction: %w", err)
 		}
@@ -570,7 +570,7 @@ func (s *SQLStore) PutAllContactNames(contacts []store.ContactEntry) error {
 			return fmt.Errorf("failed to commit transaction: %w", err)
 		}
 	} else if len(contacts) > 0 {
-		err := s.putContactNamesBatch(s.db, contacts)
+		err := s.putContactNamesBatch(s.Db, contacts)
 		if err != nil {
 			return err
 		}
@@ -591,7 +591,7 @@ func (s *SQLStore) getContact(user types.JID) (*types.ContactInfo, error) {
 	}
 
 	var first, full, push, business sql.NullString
-	err := s.db.QueryRow(getContactQuery, s.JID, user).Scan(&first, &full, &push, &business)
+	err := s.Db.QueryRow(getContactQuery, s.JID, user).Scan(&first, &full, &push, &business)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return nil, err
 	}
@@ -619,7 +619,7 @@ func (s *SQLStore) GetContact(user types.JID) (types.ContactInfo, error) {
 func (s *SQLStore) GetAllContacts() (map[types.JID]types.ContactInfo, error) {
 	s.contactCacheLock.Lock()
 	defer s.contactCacheLock.Unlock()
-	rows, err := s.db.Query(getAllContactsQuery, s.JID)
+	rows, err := s.Db.Query(getAllContactsQuery, s.JID)
 	if err != nil {
 		return nil, err
 	}
@@ -659,23 +659,23 @@ func (s *SQLStore) PutMutedUntil(chat types.JID, mutedUntil time.Time) error {
 	if !mutedUntil.IsZero() {
 		val = mutedUntil.Unix()
 	}
-	_, err := s.db.Exec(fmt.Sprintf(putChatSettingQuery, "muted_until"), s.JID, chat, val)
+	_, err := s.Db.Exec(fmt.Sprintf(putChatSettingQuery, "muted_until"), s.JID, chat, val)
 	return err
 }
 
 func (s *SQLStore) PutPinned(chat types.JID, pinned bool) error {
-	_, err := s.db.Exec(fmt.Sprintf(putChatSettingQuery, "pinned"), s.JID, chat, pinned)
+	_, err := s.Db.Exec(fmt.Sprintf(putChatSettingQuery, "pinned"), s.JID, chat, pinned)
 	return err
 }
 
 func (s *SQLStore) PutArchived(chat types.JID, archived bool) error {
-	_, err := s.db.Exec(fmt.Sprintf(putChatSettingQuery, "archived"), s.JID, chat, archived)
+	_, err := s.Db.Exec(fmt.Sprintf(putChatSettingQuery, "archived"), s.JID, chat, archived)
 	return err
 }
 
 func (s *SQLStore) GetChatSettings(chat types.JID) (settings types.LocalChatSettings, err error) {
 	var mutedUntil int64
-	err = s.db.QueryRow(getChatSettingsQuery, s.JID, chat).Scan(&mutedUntil, &settings.Pinned, &settings.Archived)
+	err = s.Db.QueryRow(getChatSettingsQuery, s.JID, chat).Scan(&mutedUntil, &settings.Pinned, &settings.Archived)
 	if errors.Is(err, sql.ErrNoRows) {
 		err = nil
 	} else if err != nil {
@@ -701,12 +701,12 @@ const (
 )
 
 func (s *SQLStore) PutMessageSecrets(inserts []store.MessageSecretInsert) (err error) {
-	tx, err := s.db.Begin()
+	tx, err := s.Db.Begin()
 	if err != nil {
 		return fmt.Errorf("failed to begin transaction: %w", err)
 	}
 	for _, insert := range inserts {
-		_, err = s.db.Exec(putMsgSecret, s.JID, insert.Chat.ToNonAD(), insert.Sender.ToNonAD(), insert.ID, insert.Secret)
+		_, err = s.Db.Exec(putMsgSecret, s.JID, insert.Chat.ToNonAD(), insert.Sender.ToNonAD(), insert.ID, insert.Secret)
 	}
 	err = tx.Commit()
 	if err != nil {
@@ -716,12 +716,12 @@ func (s *SQLStore) PutMessageSecrets(inserts []store.MessageSecretInsert) (err e
 }
 
 func (s *SQLStore) PutMessageSecret(chat, sender types.JID, id types.MessageID, secret []byte) (err error) {
-	_, err = s.db.Exec(putMsgSecret, s.JID, chat.ToNonAD(), sender.ToNonAD(), id, secret)
+	_, err = s.Db.Exec(putMsgSecret, s.JID, chat.ToNonAD(), sender.ToNonAD(), id, secret)
 	return
 }
 
 func (s *SQLStore) GetMessageSecret(chat, sender types.JID, id types.MessageID) (secret []byte, err error) {
-	err = s.db.QueryRow(getMsgSecret, s.JID, chat.ToNonAD(), sender.ToNonAD(), id).Scan(&secret)
+	err = s.Db.QueryRow(getMsgSecret, s.JID, chat.ToNonAD(), sender.ToNonAD(), id).Scan(&secret)
 	if errors.Is(err, sql.ErrNoRows) {
 		err = nil
 	}

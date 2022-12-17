@@ -71,7 +71,7 @@ func NewWithDB(db *sql.DB, dialect string, log waLog.Logger) *Container {
 		log = waLog.Noop
 	}
 	return &Container{
-		db:      db,
+		Db:      db,
 		dialect: dialect,
 		log:     log,
 	}
@@ -134,7 +134,7 @@ func (c *Container) scanDevice(row scannable) (*store.Device, error) {
 
 // GetAllDevices finds all the devices in the database.
 func (c *Container) GetAllDevices() ([]*store.Device, error) {
-	res, err := c.db.Query(getAllDevicesQuery)
+	res, err := c.Db.Query(getAllDevicesQuery)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query sessions: %w", err)
 	}
@@ -170,7 +170,7 @@ func (c *Container) GetFirstDevice() (*store.Device, error) {
 //
 // Note that the parameter usually must be an AD-JID.
 func (c *Container) GetDevice(jid types.JID) (*store.Device, error) {
-	sess, err := c.scanDevice(c.db.QueryRow(getDeviceQuery, jid))
+	sess, err := c.scanDevice(c.Db.QueryRow(getDeviceQuery, jid))
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
@@ -223,7 +223,7 @@ func (c *Container) PutDevice(device *store.Device) error {
 	if device.ID == nil {
 		return ErrDeviceIDMustBeSet
 	}
-	_, err := c.db.Exec(insertDeviceQuery,
+	_, err := c.Db.Exec(insertDeviceQuery,
 		device.ID.String(), device.RegistrationID, device.NoiseKey.Priv[:], device.IdentityKey.Priv[:],
 		device.SignedPreKey.Priv[:], device.SignedPreKey.KeyID, device.SignedPreKey.Signature[:],
 		device.AdvSecretKey, device.Account.Details, device.Account.AccountSignature, device.Account.AccountSignatureKey, device.Account.DeviceSignature,
@@ -250,6 +250,6 @@ func (c *Container) DeleteDevice(store *store.Device) error {
 	if store.ID == nil {
 		return ErrDeviceIDMustBeSet
 	}
-	_, err := c.db.Exec(deleteDeviceQuery, store.ID.String())
+	_, err := c.Db.Exec(deleteDeviceQuery, store.ID.String())
 	return err
 }
