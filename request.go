@@ -13,8 +13,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	waBinary "go.mau.fi/whatsmeow/binary"
-	"go.mau.fi/whatsmeow/types"
+	waBinary "github.com/ZED-Magdy/whatsmeow/binary"
+	"github.com/ZED-Magdy/whatsmeow/types"
 )
 
 func (cli *Client) generateRequestID() string {

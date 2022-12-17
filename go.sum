@@ -7,8 +7,8 @@ github.com/gorilla/websocket v1.5.0 h1:PPwGk2jz7EePpoHN/+ClbZu8SPxiqlu12wZP/3sWm
 github.com/gorilla/websocket v1.5.0/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
 go.mau.fi/libsignal v0.0.0-20221015105917-d970e7c3c9cf h1:mzPxXBgDPHKDHMVV1tIWh7lwCiRpzCsXC0gNRX+K07c=
 go.mau.fi/libsignal v0.0.0-20221015105917-d970e7c3c9cf/go.mod h1:XCjaU93vl71YNRPn059jMrK0xRDwVO5gKbxoPxow9mQ=
-go.mau.fi/whatsmeow v0.0.0-20221213225758-70ef67df3c68 h1:uieThnMYyFDdUNDrHxauuZOW5ip+igWhHwyWFNjA2Sw=
-go.mau.fi/whatsmeow v0.0.0-20221213225758-70ef67df3c68/go.mod h1:2yweL8nczvtlIxkrvCb0y8xiO13rveX9lJPambwYV/E=
+github.com/ZED-Magdy/whatsmeow v0.0.0-20221213225758-70ef67df3c68 h1:uieThnMYyFDdUNDrHxauuZOW5ip+igWhHwyWFNjA2Sw=
+github.com/ZED-Magdy/whatsmeow v0.0.0-20221213225758-70ef67df3c68/go.mod h1:2yweL8nczvtlIxkrvCb0y8xiO13rveX9lJPambwYV/E=
 golang.org/x/crypto v0.4.0 h1:UVQgzMY87xqpKNgb+kDsll2Igd33HszWHFLmpaRMq/8=
 golang.org/x/crypto v0.4.0/go.mod h1:3quD/ATkf6oY+rnes5c3ExXTbLc8mueNue5/DoinL80=
 golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543 h1:E7g+9GITq07hpfrRu66IVDexMakfv52eLZ2CXBWiKr4=
